@@ -1,0 +1,20 @@
+{
+  "name": "twitchidle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && node dist/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.3.3"
+  },
+  "dependencies": {
+    "@types/node": "^11.9.4",
+    "axios": "^0.18.0",
+    "tmi.js": "^1.4.2"
+  }
+}
