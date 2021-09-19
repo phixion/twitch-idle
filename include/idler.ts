@@ -7,6 +7,9 @@ module Idler {
         private clientId: string = config.clientId;
         private userName: string = config.userName;
         private userAuth: string = config.userAuth;
+        private Token: string = config.token;
+
+
         private userId: string = '';
         public part: Array<string> = [];
 
@@ -29,20 +32,35 @@ module Idler {
                     login: userName
                 },
                 headers: {
-                    'Client-ID': this.clientId
+                    'Client-ID': this.clientId,
+                    'Authorization': `Bearer ${this.Token}`
                 }
             })
         }
 
         // Returns a list of channels followed by given userId
         public getFollowing(userId: string) {
-            return axios.get(`https://api.twitch.tv/helix/users/follows`,{
+            return axios.get(`https://api.twitch.tv/helix/users/follows`, {
                 params: {
                     from_id: userId,
                     first: 100
                 },
                 headers: {
-                    'Client-ID': this.clientId
+                    'Client-ID': this.clientId,
+                    'Authorization': `Bearer ${this.Token}`
+                }
+            })
+        }
+
+        // Returns a list of Top channels
+        public getTopChannels() {
+            return axios.get(`https://api.twitch.tv/helix/streams`, {
+                params: {
+                    first: 50
+                },
+                headers: {
+                    'Client-ID': this.clientId,
+                    'Authorization': `Bearer ${this.Token}`
                 }
             })
         }
@@ -55,7 +73,8 @@ module Idler {
                     user_login: channels
                 },
                 headers: {
-                    'Client-ID': this.clientId
+                    'Client-ID': this.clientId,
+                    'Authorization': `Bearer ${this.Token}`
                 }
             })
         }
@@ -108,19 +127,25 @@ module Idler {
                                     .then(channels => {
                                         console.log('DEBUG | Received live channels');
                                         let liveChannels = channels.data.data.map((c: { user_name: any; }) => c.user_name);
-                                        
-                                        // Join online channels we aren't part of
-                                        liveChannels.map((channel: string) => {
-                                            if (!this.part.includes(channel)) {
-                                                this.joinChannel(channel);
-                                            }
-                                        })
 
-                                        // Leave channels we are part of, but which are not online anymore
-                                        this.part.map(channel => {
-                                            if (!liveChannels.includes(channel)) {
-                                                this.partChannel(channel);
-                                            }
+                                        // Get Top 50 streams 
+                                        this.getTopChannels().then(channels => {
+                                            console.log('DEBUG | Received top channels');
+                                            liveChannels = liveChannels.concat(channels.data.data.map((c: { user_name: any; }) => c.user_name)).filter((user: any) => /^[a-zA-Z_0-9.]+$/.test(user))
+
+                                            // Join online channels we aren't part of
+                                            liveChannels.map((channel: string) => {
+                                                if (!this.part.includes(channel)) {
+                                                    this.joinChannel(channel);
+                                                }
+                                            })
+
+                                            // Leave channels we are part of, but which are not online anymore
+                                            this.part.map(channel => {
+                                                if (!liveChannels.includes(channel)) {
+                                                    this.partChannel(channel);
+                                                }
+                                            })
                                         })
                                     })
                             });

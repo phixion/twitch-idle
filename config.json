@@ -1,5 +1,6 @@
 {
     "clientId": "<twitch app client id>",
     "userName": "<twitch username>",
-    "userAuth": "<twitch password/oauth token>"
+    "userAuth": "<TMI oauth token>",
+    "token": "<twitch app oauth token>"
 }
